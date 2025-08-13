@@ -1,5 +1,5 @@
 import { tokenizerFactory } from '../lib/tokenizerFactory'
-import type { TokenizerSpec } from '../adapters/types'
+import type { TokenizerSpec, TokenizerAdapter } from '../adapters/types'
 
 export interface TokenizeRequest {
   id: string
@@ -55,7 +55,7 @@ self.onmessage = async (event: MessageEvent<TokenizeRequest>) => {
 }
 
 // Chunked counting for large texts to prevent worker blocking
-async function countTokensChunked(text: string, adapter: any): Promise<number> {
+async function countTokensChunked(text: string, adapter: TokenizerAdapter): Promise<number> {
   if (text.length <= CHUNK_SIZE) {
     return await adapter.count(text)
   }

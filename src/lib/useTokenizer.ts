@@ -33,12 +33,14 @@ export function useTokenizer(options: UseTokenizerOptions = {}) {
       }
     }
 
+    // Capture map reference at effect creation to satisfy exhaustive-deps rule
+    const pendingMap = pendingRequests.current
     return () => {
       if (workerRef.current) {
         workerRef.current.terminate()
         workerRef.current = null
       }
-      pendingRequests.current.clear()
+      pendingMap.clear()
     }
   }, [])
 
@@ -74,7 +76,8 @@ export function useTokenizer(options: UseTokenizerOptions = {}) {
 
       workerRef.current.postMessage(request)
     })
-  }, [options])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- options callbacks considered stable
+  }, [options.onTokenCount, options.onError])
 
   const encodeTokens = useCallback(async (text: string, spec: TokenizerSpec): Promise<number[]> => {
     return new Promise((resolve, reject) => {
@@ -106,7 +109,8 @@ export function useTokenizer(options: UseTokenizerOptions = {}) {
 
       workerRef.current.postMessage(request)
     })
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- options.onError considered stable
+  }, [options.onError])
 
   return {
     countTokens,

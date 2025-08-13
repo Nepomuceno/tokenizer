@@ -29,7 +29,13 @@ export class HuggingFaceAdapter implements TokenizerAdapter {
   async init(): Promise<void> {
     try {
       // Load tokenizer.json file
-      let tokenizerData: any
+      interface TokenizerJSON {
+        model?: {
+          vocab?: SimpleBPEVocab
+          merges?: string[]
+        }
+      }
+      let tokenizerData: TokenizerJSON
       
       if (this.tokenizerPath.startsWith('http')) {
         // For remote tokenizer.json files

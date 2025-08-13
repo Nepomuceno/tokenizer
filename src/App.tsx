@@ -4,7 +4,7 @@ import { useTokenizer } from './lib/useTokenizer'
 import { useSimpleTokenizer, type TokenInfo } from './lib/useSimpleTokenizer'
 import { CostCalculator } from './components/CostCalculator'
 import { Banner } from './components/Banner'
-import { FileIcon, FileUploadIcon, FileProcessingIcon } from './components/FileIcons'
+import { FileUploadIcon, FileProcessingIcon } from './components/FileIcons'
 
 const MODELS = getAllModels()
 
@@ -69,7 +69,6 @@ function App() {
   })
 
   const isTokenizing = isCountingTokens || isTokenizingForPreview
-  const isProcessing = isTokenizing || isLoadingFile
 
   // Track if file is large for performance optimizations
   useEffect(() => {
@@ -146,7 +145,7 @@ function App() {
     }, debounceDelay)
     
     return () => clearTimeout(id)
-  }, [cacheKey, isLargeFile, showTokenPreview, countTokens, tokenizeText])
+  }, [cacheKey, isLargeFile, showTokenPreview, countTokens, tokenizeText, model.tokenizerSpec, text])
 
   const overCtx = tokenCount > model.contextWindow
   const pct = Math.min(100, (tokenCount / model.contextWindow) * 100 || 0)

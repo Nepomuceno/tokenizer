@@ -11,7 +11,8 @@ export class TikTokenAdapter implements TokenizerAdapter {
 
   async init(): Promise<void> {
     if (!this.tokenizer) {
-      this.tokenizer = get_encoding(this.encoding as any)
+      // get_encoding already has proper typings for known encodings
+      this.tokenizer = get_encoding(this.encoding as unknown as never)
     }
   }
 
@@ -48,9 +49,18 @@ export class TikTokenAdapter implements TokenizerAdapter {
       throw new Error('TikToken adapter not initialized. Call init() first.')
     }
     
-    const uint32Array = new Uint32Array(tokenIds)
-    const decoded = this.tokenizer.decode(uint32Array)
-    return new TextDecoder().decode(decoded)
+  const arr = new Uint32Array(tokenIds)
+  const bytes = this.tokenizer.decode(arr)
+  return new TextDecoder().decode(bytes)
+  }
+
+  /** Decode a single token id to text (helper for visualization) */
+  async decodeSingle(tokenId: number): Promise<string> {
+    if (!this.tokenizer) {
+      throw new Error('TikToken adapter not initialized. Call init() first.')
+    }
+    const bytes = this.tokenizer.decode_single_token_bytes(tokenId)
+    return new TextDecoder().decode(bytes)
   }
 
   /**

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { tokenizerFactory } from './tokenizerFactory'
 import type { TokenizerSpec, TokenizerAdapter } from '../adapters/types'
 
@@ -23,6 +23,8 @@ export interface UseSimpleTokenizerOptions {
  */
 export function useSimpleTokenizer(options: UseSimpleTokenizerOptions = {}) {
   const [isTokenizing, setIsTokenizing] = useState(false)
+  const optionsRef = useRef(options)
+  optionsRef.current = options
 
   const tokenizeText = useCallback(async (text: string, spec: TokenizerSpec): Promise<{ count: number, tokens: TokenInfo[] }> => {
     try {
@@ -38,18 +40,18 @@ export function useSimpleTokenizer(options: UseSimpleTokenizerOptions = {}) {
       // Get the actual token strings by reconstructing from the SimpleTokenizerAdapter
       const tokenInfos = await getActualTokens(text, adapter)
       
-      options.onTokenCount?.(count)
-      options.onTokens?.(tokenInfos)
+  optionsRef.current.onTokenCount?.(count)
+  optionsRef.current.onTokens?.(tokenInfos)
       setIsTokenizing(false)
       
       return { count, tokens: tokenInfos }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
-      options.onError?.(errorMessage)
+    optionsRef.current.onError?.(errorMessage)
       setIsTokenizing(false)
       throw error
     }
-  }, [options])
+  }, [])
 
   const countTokens = useCallback(async (text: string, spec: TokenizerSpec): Promise<number> => {
     const result = await tokenizeText(text, spec)
@@ -68,7 +70,7 @@ export function useSimpleTokenizer(options: UseSimpleTokenizerOptions = {}) {
       return tokens
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
-      options.onError?.(errorMessage)
+    optionsRef.current.onError?.(errorMessage)
       setIsTokenizing(false)
       throw error
     }
@@ -80,6 +82,12 @@ export function useSimpleTokenizer(options: UseSimpleTokenizerOptions = {}) {
     tokenizeText,
     isTokenizing
   }
+}
+
+interface DecodeCapableAdapter extends TokenizerAdapter {
+  decode?(ids: number[]): Promise<string>
+  decodeSingle?(id: number): Promise<string>
+  tokenize?(text: string): string[]
 }
 
 // Get actual tokens directly from the tokenizer adapter
@@ -95,23 +103,25 @@ async function getActualTokens(text: string, adapter: TokenizerAdapter): Promise
   const tokens: TokenInfo[] = []
   
   // Check if this is a TikToken adapter with decode capability
-  if ((adapter as any).decode) {
-    // TikToken path - decode each token individually to get the actual token strings
+  const maybeDecode = (adapter as DecodeCapableAdapter).decode
+  if (maybeDecode) {
+    // Per-token decode approach; decode each token ID individually.
+    // This may not always match exact original segmentation but avoids placeholders.
+    const decodeSingle = (adapter as DecodeCapableAdapter).decodeSingle
     for (let i = 0; i < tokenIds.length; i++) {
       const tokenId = tokenIds[i]
       try {
-        // Decode single token to get its string representation
-        const tokenText = await (adapter as any).decode([tokenId])
-        
+        const tokenText = decodeSingle
+          ? await decodeSingle.call(adapter, tokenId)
+          : await maybeDecode([tokenId])
         tokens.push({
           text: tokenText,
           id: tokenId,
           index: i,
-          start: 0, // We'll calculate positions later for TikToken
+          start: 0,
           end: 0
         })
-      } catch (error) {
-        // Fallback if decode fails for individual token
+      } catch {
         tokens.push({
           text: `<token_${tokenId}>`,
           id: tokenId,
@@ -121,8 +131,7 @@ async function getActualTokens(text: string, adapter: TokenizerAdapter): Promise
         })
       }
     }
-    
-    // For TikToken, calculate positions by reconstructing the full text
+    // Calculate positions by concatenating decoded token strings
     let currentPos = 0
     for (const token of tokens) {
       token.start = currentPos
@@ -131,7 +140,7 @@ async function getActualTokens(text: string, adapter: TokenizerAdapter): Promise
     }
   } else {
     // Simple tokenizer fallback
-    const tokenStrings = (adapter as any).tokenize ? (adapter as any).tokenize(text) : getTokenStrings(text)
+  const tokenStrings = (adapter as DecodeCapableAdapter).tokenize ? (adapter as DecodeCapableAdapter).tokenize!(text) : getTokenStrings(text)
     let currentPos = 0
     
     for (let i = 0; i < Math.min(tokenIds.length, tokenStrings.length); i++) {
