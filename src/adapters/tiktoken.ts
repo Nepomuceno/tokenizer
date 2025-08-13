@@ -74,8 +74,11 @@ export class TikTokenAdapter implements TokenizerAdapter {
     }
 
   // Minimal inline registry subset (avoid importing full registry.json)
-  // We first attempt to load from local /encodings/*.tiktoken (user can add files for offline + no CORS)
-  const localBase = '/encodings'
+  // We first attempt to load from local encodings/*.tiktoken (user can add files for offline + no CORS)
+  // IMPORTANT: Use import.meta.env.BASE_URL so that GitHub Pages subpath deployments (e.g. /tokenizer/) resolve
+  // correctly instead of pointing to the domain root. BASE_URL already has a trailing slash in Vite.
+  const baseUrl = (import.meta as any).env?.BASE_URL || '/'
+  const localBase = `${baseUrl.replace(/\/+$/, '')}/encodings`
   const registry: Record<string, BpeRegistryEntry> = {
       cl100k_base: { load_tiktoken_bpe: `${localBase}/cl100k_base.tiktoken`, remote: 'https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken', special_tokens: { '<|endoftext|>': 100257, '<|fim_prefix|>': 100258, '<|fim_middle|>': 100259, '<|fim_suffix|>': 100260, '<|endofprompt|>': 100276 }, pat_str: "(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\\r\\n\\p{L}\\p{N}]?\\p{L}+|\\p{N}{1,3}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+" },
       o200k_base: { load_tiktoken_bpe: `${localBase}/o200k_base.tiktoken`, remote: 'https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken', special_tokens: { '<|endoftext|>': 199999, '<|endofprompt|>': 200018 }, pat_str: "[^\\r\\n\\p{L}\\p{N}]?[\\p{Lu}\\p{Lt}\\p{Lm}\\p{Lo}\\p{M}]*[\\p{Ll}\\p{Lm}\\p{Lo}\\p{M}]+(?i:'s|'t|'re|'ve|'m|'ll|'d)?|[^\\r\\n\\p{L}\\p{N}]?[\\p{Lu}\\p{Lt}\\p{Lm}\\p{Lo}\\p{M}]+[\\p{Ll}\\p{Lm}\\p{Lo}\\p{M}]* (?i:'s|'t|'re|'ve|'m|'ll|'d)?|\\p{N}{1,3}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n/]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+" },

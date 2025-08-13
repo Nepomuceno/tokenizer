@@ -147,6 +147,19 @@ Key principles:
 
 ## 🤝 Contributing
 
+## 📦 Deployment Notes (GitHub Pages)
+
+The app is deployed under a subpath (`https://<user>.github.io/tokenizer/`). To keep static assets resolving correctly:
+
+* `vite.config.ts` uses `base: './'` so built asset references are relative.
+* All favicon / manifest links in `index.html` use `./` prefixes (no leading `/`).
+* `public/manifest.json` sets `icons[].src`, `start_url`, and `scope` to `./` forms.
+* The tiktoken adapter builds its local encodings path from `import.meta.env.BASE_URL` so it fetches `./encodings/*.tiktoken` instead of hitting the domain root (`/encodings`), avoiding 404 + CORS when hosted in a subfolder.
+* Avoid introducing absolute leading-slash asset paths unless you change deployment to the domain root.
+
+If you fork and deploy at another subpath, no changes are needed; if you deploy at root, everything still works because relative paths resolve there as well.
+
+
 Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup, guidelines, and PR checklist.
 
 Please follow conventional commits where practical (e.g., `feat: add qwen tokenizer`).
