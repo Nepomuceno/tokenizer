@@ -114,8 +114,18 @@ async function getActualTokens(text: string, adapter: TokenizerAdapter): Promise
         const tokenText = decodeSingle
           ? await decodeSingle.call(adapter, tokenId)
           : await maybeDecode([tokenId])
+        
+        // Handle empty or whitespace-only tokens by making them visible
+        let displayText = tokenText
+        if (!tokenText) {
+          displayText = `<empty_${tokenId}>`
+        } else if (tokenText.trim() === '' && tokenText.length > 0) {
+          // Make whitespace tokens visible by showing the actual whitespace character
+          displayText = tokenText.replace(/ /g, '·').replace(/\t/g, '→').replace(/\n/g, '↵')
+        }
+        
         tokens.push({
-          text: tokenText,
+          text: displayText,
           id: tokenId,
           index: i,
           start: 0,

@@ -180,6 +180,14 @@ body {
   margin: 0;
 }
 
+/* Special styling for whitespace tokens */
+.token-chip:has-text("·"), 
+.token-chip:has-text("→"), 
+.token-chip:has-text("↵") {
+  background: var(--tc-muted) !important;
+  opacity: 0.8;
+}
+
 /* Mobile responsive token preview */
 @media (max-width: 640px) {
   .token-preview {

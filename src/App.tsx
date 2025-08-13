@@ -6,7 +6,6 @@ import { CostCalculator } from './components/CostCalculator'
 import { Banner } from './components/Banner'
 
 const RAW_MODELS = getAllModels()
-
 // Ordering preferences
 const PROVIDER_ORDER = [
   'OpenAI',
