@@ -67,6 +67,7 @@ const FIRST_ENABLED_MODEL = MODELS.find(m => !m.disabled) || MODELS[0]
 // Configuration for large file handling
 const PERFORMANCE_CONFIG = {
   LARGE_FILE_THRESHOLD: 500000, // 500KB chars - reduced threshold
+  MEDIUM_FILE_THRESHOLD: 100000, // 100KB chars - threshold for auto token preview
   MAX_TOKENS_TO_DISPLAY: 400,
   MAX_TOKENS_FOR_DETAILED_VIEW: 100,
   CHUNK_SIZE_FOR_PROCESSING: 100000, // 100KB chunks
@@ -74,9 +75,16 @@ const PERFORMANCE_CONFIG = {
 }
 
 function getTokenColor(tokenId: number): string {
-  // Use token ID for consistent color generation
-  const hue = (tokenId * 137.508) % 360 // Golden angle approximation for better distribution
-  return `hsl(${hue}, 70%, 85%)`
+  // Use header colors for consistent branding
+  const colors = [
+    '#a78bfa', // Purple
+    '#34d399', // Green
+    '#fbbf24', // Yellow
+    '#60a5fa', // Blue
+    '#f87171', // Red
+    '#c084fc', // Pink
+  ]
+  return colors[tokenId % colors.length]
 }
 
 function App() {
@@ -88,6 +96,7 @@ function App() {
   const [tokenError, setTokenError] = useState<string>()
   const [showTokenPreview, setShowTokenPreview] = useState(true)
   const [isLargeFile, setIsLargeFile] = useState(false)
+  const [isMediumFile, setIsMediumFile] = useState(false)
   const [showTokenIds, setShowTokenIds] = useState(false)
   const [isLoadingFile, setIsLoadingFile] = useState(false)
   const [loadedFileName, setLoadedFileName] = useState<string>()
@@ -129,7 +138,9 @@ function App() {
   // Track if file is large for performance optimizations
   useEffect(() => {
     const large = text.length > PERFORMANCE_CONFIG.LARGE_FILE_THRESHOLD
+    const medium = text.length > PERFORMANCE_CONFIG.MEDIUM_FILE_THRESHOLD && !large
     setIsLargeFile(large)
+    setIsMediumFile(medium)
     if (large && showTokenPreview) {
       setShowTokenPreview(false) // Auto-disable token preview for large files
     }
@@ -184,13 +195,13 @@ function App() {
             }))
           }
           tokenizationCache.current.set(cacheKey, result)
-        } else if (!showTokenPreview) {
+        } else if (!showTokenPreview && !isMediumFile) {
           // For smaller files when preview is disabled, only count tokens
           const count = await countTokens(text, model.tokenizerSpec)
           const result = { count, tokens: [] }
           tokenizationCache.current.set(cacheKey, result)
         } else {
-          // For smaller files with preview enabled, get full tokenization
+          // For smaller files with preview enabled OR medium files, get full tokenization
           const result = await tokenizeText(text, model.tokenizerSpec)
           tokenizationCache.current.set(cacheKey, result)
         }
@@ -201,7 +212,7 @@ function App() {
     }, debounceDelay)
     
     return () => clearTimeout(id)
-  }, [cacheKey, isLargeFile, showTokenPreview, countTokens, tokenizeText, model.tokenizerSpec, text])
+  }, [cacheKey, isLargeFile, isMediumFile, showTokenPreview, countTokens, tokenizeText, model.tokenizerSpec, text])
 
   const overCtx = tokenCount > model.contextWindow
   const pct = Math.min(100, (tokenCount / model.contextWindow) * 100 || 0)
@@ -249,20 +260,20 @@ function App() {
   return (
     <div className="app-shell">
       <Banner />
-      <div className="mb-6 flex items-start gap-6 flex-col lg:flex-row">
+      <div className="mb-6 flex items-start gap-4 sm:gap-6 flex-col lg:flex-row">
         {/* Left column */}
-        <div className="flex-1 w-full max-w-xl space-y-4">
+        <div className="flex-1 w-full space-y-4">
           <div>
             <button
               onClick={handleFilePick}
-              className={`btn btn-primary flex items-center gap-2 ${isLoadingFile ? 'opacity-75 cursor-wait' : ''}`}
+              className={`btn btn-primary flex items-center gap-2 w-full sm:w-auto ${isLoadingFile ? 'opacity-75 cursor-wait' : ''}`}
               aria-label="Select a file to count tokens"
               disabled={isLoadingFile}
             >
               {isLoadingFile ? (
                 <>
                   <span role="img" aria-label="Loading" className="animate-pulse">⏳</span>
-                  Loading {loadedFileName}...
+                  <span className="truncate">Loading {loadedFileName}...</span>
                 </>
               ) : (
                 <>
@@ -290,25 +301,25 @@ function App() {
           </div>
           <div className="token-preview" aria-label="Token preview" role="region">
             {isLoadingFile && (
-              <div className="text-sm text-[var(--tc-info)] px-3 py-2 bg-blue-50 rounded border-l-2 border-blue-300 flex items-center gap-2">
-                <span role="img" aria-label="Loading" className="animate-pulse">⏳</span>
+              <div className="text-sm px-3 py-2 rounded border-l-2 flex items-center gap-2 info-message">
+                <span className="animate-pulse">⏳</span>
                 Loading file "{loadedFileName}"...
               </div>
             )}
             {isTokenizing && (
-              <div className="text-sm text-[var(--tc-muted)] px-3 py-2 bg-blue-50 rounded border-l-2 border-blue-300 flex items-center gap-2">
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+              <div className="text-sm px-3 py-2 rounded border-l-2 flex items-center gap-2 info-message">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></div>
                 {isLargeFile ? 'Processing large file...' : 'Tokenizing...'}
               </div>
             )}
             {tokenError && (
-              <div className="text-sm text-[var(--tc-danger)] px-3 py-2 bg-red-50 rounded border-l-2 border-red-300">
+              <div className="text-sm px-3 py-2 rounded border-l-2 error-message">
                 Error: {tokenError}
               </div>
             )}
             {isLargeFile && !isTokenizing && !tokenError && tokens.length > 0 && (
               <>
-                <div className="text-sm text-[var(--tc-info)] px-3 py-2 bg-blue-50 rounded border-l-2 border-blue-300 mb-2">
+                <div className="text-sm px-3 py-2 rounded border-l-2 mb-2 info-message">
                   Showing preview of first {PERFORMANCE_CONFIG.PREVIEW_SAMPLE_SIZE.toLocaleString()} characters 
                   ({tokens.length} tokens). Full file: {charCount.toLocaleString()} chars, {tokenCount.toLocaleString()} tokens.
                 </div>
@@ -328,14 +339,14 @@ function App() {
                   )
                 })}
                 {tokens.length > PERFORMANCE_CONFIG.MAX_TOKENS_TO_DISPLAY && (
-                  <span className="text-xs text-[var(--tc-muted)] px-2 py-1 bg-gray-50 rounded border-l-2 border-gray-300">
+                  <span className="text-xs px-2 py-1 rounded border-l-2 neutral-message">
                     + {tokens.length - PERFORMANCE_CONFIG.MAX_TOKENS_TO_DISPLAY} more preview tokens
                   </span>
                 )}
               </>
             )}
             {isLargeFile && !isTokenizing && !tokenError && tokens.length === 0 && (
-              <div className="text-sm text-[var(--tc-muted)] px-3 py-2 bg-yellow-50 rounded border-l-2 border-yellow-300">
+              <div className="text-sm px-3 py-2 rounded border-l-2 warning-message">
                 Large file detected ({charCount.toLocaleString()} characters). Generating token preview...
                 <button 
                   onClick={() => setShowTokenPreview(true)}
@@ -345,7 +356,34 @@ function App() {
                 </button>
               </div>
             )}
-            {!isLargeFile && !isTokenizing && !tokenError && tokens.length > 0 && (
+            {isMediumFile && !isTokenizing && !tokenError && tokens.length > 0 && (
+              <>
+                <div className="text-sm px-3 py-2 rounded border-l-2 mb-2 info-message">
+                  Medium file ({charCount.toLocaleString()} characters, {tokenCount.toLocaleString()} tokens)
+                </div>
+                {tokens.slice(0, PERFORMANCE_CONFIG.MAX_TOKENS_TO_DISPLAY).map(token => {
+                  const tokenColor = getTokenColor(token.id)
+                  
+                  return (
+                    <span 
+                      key={token.index} 
+                      className="token-chip"
+                      style={{ backgroundColor: tokenColor }}
+                      role="listitem" 
+                      title={`Token ${token.index + 1}: "${token.text}" (ID: ${token.id})`}
+                    >
+                      {showTokenIds ? token.id : token.text}
+                    </span>
+                  )
+                })}
+                {tokens.length > PERFORMANCE_CONFIG.MAX_TOKENS_TO_DISPLAY && (
+                  <span className="text-xs px-2 py-1 rounded border-l-2 neutral-message">
+                    + {tokens.length - PERFORMANCE_CONFIG.MAX_TOKENS_TO_DISPLAY} more tokens
+                  </span>
+                )}
+              </>
+            )}
+            {!isLargeFile && !isMediumFile && !isTokenizing && !tokenError && tokens.length > 0 && (
               <>
                 {tokens.slice(0, PERFORMANCE_CONFIG.MAX_TOKENS_TO_DISPLAY).map(token => {
                   const tokenColor = getTokenColor(token.id)
@@ -363,19 +401,19 @@ function App() {
                   )
                 })}
                 {tokens.length > PERFORMANCE_CONFIG.MAX_TOKENS_TO_DISPLAY && (
-                  <span className="text-xs text-[var(--tc-muted)] px-2 py-1 bg-gray-50 rounded border-l-2 border-gray-300">
+                  <span className="text-xs px-2 py-1 rounded border-l-2 neutral-message">
                     + {tokens.length - PERFORMANCE_CONFIG.MAX_TOKENS_TO_DISPLAY} more tokens (truncated for performance)
                   </span>
                 )}
               </>
             )}
             {!isTokenizing && !tokenError && text.trim() && tokenCount === 0 && (
-              <div className="text-sm text-[var(--tc-muted)] px-3 py-2 bg-gray-50 rounded border-l-2 border-gray-300">
+              <div className="text-sm px-3 py-2 rounded border-l-2 neutral-message">
                 No tokens found
               </div>
             )}
-            {!isLargeFile && !isTokenizing && !tokenError && text.trim() && tokenCount > 0 && tokens.length === 0 && (
-              <div className="text-sm text-[var(--tc-muted)] px-3 py-2 bg-green-50 rounded border-l-2 border-green-300">
+            {!isLargeFile && !isMediumFile && !isTokenizing && !tokenError && text.trim() && tokenCount > 0 && tokens.length === 0 && (
+              <div className="text-sm px-3 py-2 rounded border-l-2 success-message">
                 Tokenization complete: {tokenCount.toLocaleString()} tokens from {charCount.toLocaleString()} characters
                 <button 
                   onClick={() => setShowTokenPreview(true)}
@@ -389,7 +427,7 @@ function App() {
         </div>
 
         {/* Right column */}
-        <div className="w-full max-w-xs space-y-4">
+        <div className="w-full lg:max-w-xs space-y-4">
           <div className="stats-grid" aria-label="Counts">
             <div className="stat-box">
               <span className="stat-label">Characters</span>

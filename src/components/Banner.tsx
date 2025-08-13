@@ -1,5 +1,6 @@
 import React from 'react'
 import { TokenizerLogo } from './TokenizerLogo'
+import { ThemeToggle } from './ThemeToggle'
 
 const TokenizerText: React.FC = () => {
   const syllables = [
@@ -14,7 +15,7 @@ const TokenizerText: React.FC = () => {
       {syllables.map((syllable, index) => (
         <span
           key={index}
-          className="inline-block px-4 py-2 text-5xl font-bold text-gray-800"
+          className="inline-block px-2 sm:px-3 md:px-4 py-1 sm:py-2 text-2xl sm:text-4xl md:text-5xl font-bold text-gray-800"
           style={{ backgroundColor: syllable.bg }}
         >
           {syllable.text}
@@ -26,14 +27,25 @@ const TokenizerText: React.FC = () => {
 
 export const Banner: React.FC = () => {
   return (
-    <div className="flex items-center justify-center w-full py-8 mb-8">
-      <div className="flex items-center gap-10 px-12 py-6">
-        <TokenizerLogo className="flex-shrink-0" width={120} height={120} />
-        <div className="flex flex-col items-start">
-          <TokenizerText />
-          <p className="text-lg text-gray-600 mt-4 font-medium">
-            Count tokens, estimate cost, check context fit.
-          </p>
+    <div className="relative">
+      {/* Theme Toggle - positioned absolute on mobile, inline on desktop */}
+      <div className="absolute top-0 right-0 sm:top-4 sm:right-4 z-10">
+        <ThemeToggle />
+      </div>
+      
+      <div className="flex flex-col sm:flex-row items-center justify-center w-full py-6 sm:py-8 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-10 px-4 sm:px-8 md:px-12 py-4 sm:py-6">
+          <TokenizerLogo 
+            className="flex-shrink-0" 
+            width={80} 
+            height={80}
+          />
+          <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
+            <TokenizerText />
+            <p className="text-sm sm:text-base md:text-lg text-[var(--tc-muted)] mt-2 sm:mt-4 font-medium max-w-xs sm:max-w-none">
+              Count tokens, estimate cost, check context fit.
+            </p>
+          </div>
         </div>
       </div>
     </div>
