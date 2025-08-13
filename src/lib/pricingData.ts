@@ -73,30 +73,6 @@ export const PRICING_DATA: Record<string, PricingInfo> = {
     inputCachedPricePer1M: 0.75,
     priceSource: 'OpenRouter model page + OR caching doc'
   },
-  'sonar-pro': {
-    provider: 'Perplexity',
-    model: 'Sonar Pro',
-    tokenizer: 'API usage (varies by underlying model)',
-    inputPricePer1M: 3.0,
-    inputCachedPricePer1M: null,
-    priceSource: 'Perplexity pricing page'
-  },
-  'sonar-reasoning-pro': {
-    provider: 'Perplexity',
-    model: 'Sonar Reasoning Pro',
-    tokenizer: 'API usage (DeepSeek-based)',
-    inputPricePer1M: 2.0,
-    inputCachedPricePer1M: null,
-    priceSource: 'Perplexity pricing page'
-  },
-  'sonar': {
-    provider: 'Perplexity',
-    model: 'Sonar',
-    tokenizer: 'API usage',
-    inputPricePer1M: 1.0,
-    inputCachedPricePer1M: null,
-    priceSource: 'Perplexity pricing page'
-  },
   'command-r-plus': {
     provider: 'Cohere',
     model: 'Command R+',
@@ -105,77 +81,108 @@ export const PRICING_DATA: Record<string, PricingInfo> = {
     inputCachedPricePer1M: null,
     priceSource: 'OpenRouter model page'
   },
+  // Mistral pricing (mirrors modelRegistry placeholder rates; adjust with authoritative source if available)
   'mistral-large': {
     provider: 'Mistral',
-    model: 'Mistral Large (latest)',
+    model: 'Mistral Large',
     tokenizer: 'mistral-common (SentencePiece)',
-    inputPricePer1M: null,
-    inputCachedPricePer1M: null,
-    priceSource: '—'
+    inputPricePer1M: 2.0, // placeholder per 1M tokens
+    inputCachedPricePer1M: 1.0, // simple 50% cached assumption
+    priceSource: 'Provisional (update with official public pricing)'
   },
   'mistral-small': {
     provider: 'Mistral',
-    model: 'Mistral Small (latest)',
+    model: 'Mistral Small',
     tokenizer: 'mistral-common (SentencePiece)',
-    inputPricePer1M: null,
-    inputCachedPricePer1M: null,
-    priceSource: '—'
+    inputPricePer1M: 1.0,
+    inputCachedPricePer1M: 0.5,
+    priceSource: 'Provisional (update with official public pricing)'
   },
+  'mistral-7b': {
+    provider: 'Mistral',
+    model: 'Mistral 7B Instruct',
+    tokenizer: 'mistral-common (SentencePiece)',
+    inputPricePer1M: 0.25,
+    inputCachedPricePer1M: 0.125,
+    priceSource: 'Provisional (community / self-host baseline)'
+  },
+  // Open source / OSS style models (provisional self-host baseline pricing). These are placeholders so UI shows cost fields.
   'llama-3.1-405b': {
     provider: 'Meta',
     model: 'Llama 3.1 405B Instruct',
-    tokenizer: 'TikTokenizer / tiktoken-based (Llama3)',
-    inputPricePer1M: null,
+    tokenizer: 'Qwen tokenizer (temporary)',
+    inputPricePer1M: 0,
     inputCachedPricePer1M: null,
-    priceSource: '—'
+    priceSource: 'Open source (self-host); compute cost not included'
   },
   'llama-3.1-70b': {
     provider: 'Meta',
     model: 'Llama 3.1 70B Instruct',
-    tokenizer: 'TikTokenizer / tiktoken-based (Llama3)',
-    inputPricePer1M: null,
+    tokenizer: 'Qwen tokenizer (temporary)',
+    inputPricePer1M: 0,
     inputCachedPricePer1M: null,
-    priceSource: '—'
+    priceSource: 'Open source (self-host); compute cost not included'
   },
   'llama-3.1-8b': {
     provider: 'Meta',
     model: 'Llama 3.1 8B Instruct',
-    tokenizer: 'TikTokenizer / tiktoken-based (Llama3)',
-    inputPricePer1M: null,
+    tokenizer: 'Qwen tokenizer (temporary)',
+    inputPricePer1M: 0,
     inputCachedPricePer1M: null,
-    priceSource: '—'
+    priceSource: 'Open source (self-host); compute cost not included'
+  },
+  'llama-3-8b': {
+    provider: 'Meta',
+    model: 'Llama 3 8B',
+    tokenizer: 'Qwen tokenizer (temporary)',
+    inputPricePer1M: 0,
+    inputCachedPricePer1M: null,
+    priceSource: 'Open source (self-host); compute cost not included'
   },
   'qwen-2.5-72b': {
     provider: 'Alibaba',
     model: 'Qwen 2.5 72B Instruct',
     tokenizer: 'SentencePiece (HF AutoTokenizer)',
-    inputPricePer1M: null,
-    inputCachedPricePer1M: null,
-    priceSource: '—'
+  // Assumption: Similar tier to other large frontier OSS models when served via API ≈ $0.6 / 1M input
+  // (If self-hosting cost is zero in UI user can override; we surface a nominal reference value.)
+  inputPricePer1M: 0.6,
+  inputCachedPricePer1M: 0.3, // assume 50% for cached reads
+  priceSource: 'Assumed (approx large OSS model rate; adjust with official Qwen API pricing)'
   },
   'phi-3.5-mini': {
     provider: 'Microsoft',
     model: 'Phi-3.5-mini-instruct',
     tokenizer: 'SentencePiece (HF AutoTokenizer)',
-    inputPricePer1M: null,
-    inputCachedPricePer1M: null,
-    priceSource: '—'
+  // Assumption: Smaller efficient model; cheaper than Mistral Small; set at $0.1 / 1M
+  inputPricePer1M: 0.1,
+  inputCachedPricePer1M: 0.05,
+  priceSource: 'Assumed (lightweight model baseline)'
   },
   'deepseek-v3': {
     provider: 'DeepSeek',
     model: 'DeepSeek V3 (Chat)',
     tokenizer: 'HF Tokenizers / deepseek_tokenizer',
-    inputPricePer1M: null,
-    inputCachedPricePer1M: 0.07,
-    priceSource: 'DeepSeek docs (cache reads)'
+  // Assumption: Competitive with gpt-4o-mini tier for input; set at $0.18 / 1M
+  inputPricePer1M: 0.18,
+  inputCachedPricePer1M: 0.07, // keep documented cache read estimate
+  priceSource: 'Assumed input; cached from DeepSeek docs'
   },
   'deepseek-r1': {
     provider: 'DeepSeek',
     model: 'DeepSeek R1 (Reasoner)',
     tokenizer: 'HF Tokenizers / deepseek_tokenizer',
-    inputPricePer1M: null,
-    inputCachedPricePer1M: 0.14,
-    priceSource: 'DeepSeek docs (cache reads)'
+  // Assumption: Reasoning premium over V3 (~2x mini tier) => $0.36 / 1M
+  inputPricePer1M: 0.36,
+  inputCachedPricePer1M: 0.14,
+  priceSource: 'Assumed input; cached from DeepSeek docs'
+  },
+  'claude-3-haiku': {
+    provider: 'Anthropic',
+    model: 'Claude 3 Haiku',
+    tokenizer: 'Anthropic SDK (count_tokens)',
+    inputPricePer1M: 0.25,
+    inputCachedPricePer1M: 0.025,
+    priceSource: 'Anthropic pricing (prompt caching multipliers)'
   }
 }
 

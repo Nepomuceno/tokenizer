@@ -4,9 +4,65 @@ import { useTokenizer } from './lib/useTokenizer'
 import { useSimpleTokenizer, type TokenInfo } from './lib/useSimpleTokenizer'
 import { CostCalculator } from './components/CostCalculator'
 import { Banner } from './components/Banner'
-import { FileUploadIcon, FileProcessingIcon } from './components/FileIcons'
 
-const MODELS = getAllModels()
+const RAW_MODELS = getAllModels()
+
+// Ordering preferences
+const PROVIDER_ORDER = [
+  'OpenAI',
+  'Anthropic',
+  'Google',
+  'xAI',
+  'Perplexity',
+  'Cohere',
+  'Mistral',
+  'Meta',
+  'Alibaba',
+  'Microsoft',
+  'DeepSeek',
+  'Example'
+]
+const TOKENIZER_ORDER = ['tiktoken', 'anthropic', 'gemini', 'cohere', 'hf-tokenizers', 'api-based', 'simple']
+
+function detectProvider(modelKey: string): string {
+  if (modelKey.startsWith('gpt-')) return 'OpenAI'
+  if (modelKey.startsWith('claude')) return 'Anthropic'
+  if (modelKey.startsWith('gemini')) return 'Google'
+  if (modelKey.startsWith('grok')) return 'xAI'
+  // Perplexity sonar models removed
+  if (modelKey.startsWith('command')) return 'Cohere'
+  if (modelKey.startsWith('mistral')) return 'Mistral'
+  if (modelKey.startsWith('llama')) return 'Meta'
+  if (modelKey.startsWith('qwen')) return 'Alibaba'
+  if (modelKey.startsWith('phi')) return 'Microsoft'
+  if (modelKey.startsWith('deepseek')) return 'DeepSeek'
+  if (modelKey.startsWith('example')) return 'Example'
+  return 'Other'
+}
+
+function sortModels() {
+  return [...RAW_MODELS].sort((a, b) => {
+    // Disabled last
+    if (a.disabled && !b.disabled) return 1
+    if (!a.disabled && b.disabled) return -1
+
+    const pa = detectProvider(a.key)
+    const pb = detectProvider(b.key)
+    const pIndexA = PROVIDER_ORDER.indexOf(pa)
+    const pIndexB = PROVIDER_ORDER.indexOf(pb)
+    if (pIndexA !== pIndexB) return pIndexA - pIndexB
+
+    const ta = TOKENIZER_ORDER.indexOf(a.tokenizerSpec.type)
+    const tb = TOKENIZER_ORDER.indexOf(b.tokenizerSpec.type)
+    if (ta !== tb) return ta - tb
+
+    // Fallback alphabetical label
+    return a.label.localeCompare(b.label)
+  })
+}
+
+const MODELS = sortModels()
+const FIRST_ENABLED_MODEL = MODELS.find(m => !m.disabled) || MODELS[0]
 
 // Configuration for large file handling
 const PERFORMANCE_CONFIG = {
@@ -25,7 +81,7 @@ function getTokenColor(tokenId: number): string {
 
 function App() {
   const [text, setText] = useState('')
-  const [modelKey, setModelKey] = useState<string>(MODELS[0].key)
+  const [modelKey, setModelKey] = useState<string>(FIRST_ENABLED_MODEL.key)
   const [charCount, setCharCount] = useState(0)
   const [tokenCount, setTokenCount] = useState(0)
   const [tokens, setTokens] = useState<TokenInfo[]>([])
@@ -197,20 +253,20 @@ function App() {
         {/* Left column */}
         <div className="flex-1 w-full max-w-xl space-y-4">
           <div>
-            <button 
-              onClick={handleFilePick} 
-              className={`btn btn-primary flex items-center gap-2 ${isLoadingFile ? 'opacity-75 cursor-wait' : ''}`} 
+            <button
+              onClick={handleFilePick}
+              className={`btn btn-primary flex items-center gap-2 ${isLoadingFile ? 'opacity-75 cursor-wait' : ''}`}
               aria-label="Select a file to count tokens"
               disabled={isLoadingFile}
             >
               {isLoadingFile ? (
                 <>
-                  <FileProcessingIcon width={20} height={20} className="animate-pulse" />
+                  <span role="img" aria-label="Loading" className="animate-pulse">⏳</span>
                   Loading {loadedFileName}...
                 </>
               ) : (
                 <>
-                  <FileUploadIcon width={20} height={20} />
+                  <span role="img" aria-label="File">📁</span>
                   Count from file
                 </>
               )}
@@ -235,7 +291,7 @@ function App() {
           <div className="token-preview" aria-label="Token preview" role="region">
             {isLoadingFile && (
               <div className="text-sm text-[var(--tc-info)] px-3 py-2 bg-blue-50 rounded border-l-2 border-blue-300 flex items-center gap-2">
-                <FileProcessingIcon width={16} height={16} className="animate-pulse" />
+                <span role="img" aria-label="Loading" className="animate-pulse">⏳</span>
                 Loading file "{loadedFileName}"...
               </div>
             )}
@@ -413,7 +469,11 @@ function App() {
               value={modelKey}
               onChange={e => setModelKey(e.target.value)}
             >
-              {MODELS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+              {MODELS.map(m => (
+                <option key={m.key} value={m.key} disabled={m.disabled}>
+                  {m.label}{m.disabled ? ' (disabled)' : ''}
+                </option>
+              ))}
             </select>
             <div className={`context-badge ${overCtx ? 'context-over' : ''}`}>ctx {model.contextWindow.toLocaleString()}</div>
             <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden" aria-hidden="true">

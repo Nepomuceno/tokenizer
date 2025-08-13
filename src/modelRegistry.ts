@@ -9,21 +9,11 @@ export interface ModelInfo {
     inputPer1K: number
     outputPer1K: number
   }
+  /** Disabled when tokenizer adapter not fully implemented */
+  disabled?: boolean
 }
 
 export const MODEL_REGISTRY: Record<string, ModelInfo> = {
-  'example-basic': {
-    key: 'example-basic',
-    label: 'Example Basic Model',
-    contextWindow: 4096,
-    tokenizerSpec: {
-      type: 'simple'
-    },
-    pricing: {
-      inputPer1K: 0.001,
-      outputPer1K: 0.002
-    }
-  },
 
   // OpenAI Models
   'gpt-4o': {
@@ -65,7 +55,8 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     pricing: {
       inputPer1K: 3.0,
       outputPer1K: 15.0
-    }
+  },
+  disabled: true
   },
   'claude-sonnet-3.7': {
     key: 'claude-sonnet-3.7',
@@ -78,7 +69,8 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     pricing: {
       inputPer1K: 3.0,
       outputPer1K: 15.0
-    }
+  },
+  disabled: true
   },
   'claude-haiku-3.5': {
     key: 'claude-haiku-3.5',
@@ -91,7 +83,8 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     pricing: {
       inputPer1K: 0.8,
       outputPer1K: 4.0
-    }
+  },
+  disabled: true
   },
   'claude-opus-4.1': {
     key: 'claude-opus-4.1',
@@ -104,7 +97,8 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     pricing: {
       inputPer1K: 15.0,
       outputPer1K: 75.0
-    }
+  },
+  disabled: true
   },
 
   // Google Models
@@ -119,7 +113,8 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     pricing: {
       inputPer1K: 0.3,
       outputPer1K: 1.2
-    }
+  },
+  disabled: true
   },
 
   // xAI Models
@@ -134,49 +129,11 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     pricing: {
       inputPer1K: 3.0,
       outputPer1K: 15.0
-    }
+  },
+  disabled: true
   },
 
   // Perplexity Models
-  'sonar-pro': {
-    key: 'sonar-pro',
-    label: 'Sonar Pro',
-    contextWindow: 127000,
-    tokenizerSpec: {
-      type: 'api-based',
-      model: 'llama-3.1-sonar-large-128k-online'
-    },
-    pricing: {
-      inputPer1K: 3.0,
-      outputPer1K: 15.0
-    }
-  },
-  'sonar-reasoning-pro': {
-    key: 'sonar-reasoning-pro',
-    label: 'Sonar Reasoning Pro',
-    contextWindow: 127000,
-    tokenizerSpec: {
-      type: 'api-based',
-      model: 'llama-3.1-sonar-huge-128k-online'
-    },
-    pricing: {
-      inputPer1K: 2.0,
-      outputPer1K: 10.0
-    }
-  },
-  'sonar': {
-    key: 'sonar',
-    label: 'Sonar',
-    contextWindow: 127000,
-    tokenizerSpec: {
-      type: 'api-based',
-      model: 'llama-3.1-sonar-small-128k-online'
-    },
-    pricing: {
-      inputPer1K: 1.0,
-      outputPer1K: 5.0
-    }
-  },
 
   // Cohere Models
   'command-r-plus': {
@@ -190,7 +147,8 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     pricing: {
       inputPer1K: 3.0,
       outputPer1K: 15.0
-    }
+  },
+  disabled: true
   },
 
   // Mistral Models
@@ -245,7 +203,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     tokenizerSpec: {
       type: 'hf-tokenizers',
       tokenizerPath: '/tokenizers/qwen.json'
-    }
+  }
   },
   'llama-3.1-70b': {
     key: 'llama-3.1-70b',
@@ -254,7 +212,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     tokenizerSpec: {
       type: 'hf-tokenizers',
       tokenizerPath: '/tokenizers/qwen.json'
-    }
+  }
   },
   'llama-3.1-8b': {
     key: 'llama-3.1-8b',
@@ -263,7 +221,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     tokenizerSpec: {
       type: 'hf-tokenizers',
       tokenizerPath: '/tokenizers/qwen.json'
-    }
+  }
   },
 
   // Alibaba Qwen Models
@@ -309,19 +267,6 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
   },
 
   // Legacy models for backward compatibility
-  'gpt-4': {
-    key: 'gpt-4',
-    label: 'GPT-4',
-    contextWindow: 8192,
-    tokenizerSpec: {
-      type: 'tiktoken',
-      encoding: 'cl100k_base'
-    },
-    pricing: {
-      inputPer1K: 30.0,
-      outputPer1K: 60.0
-    }
-  },
   'llama-3-8b': {
     key: 'llama-3-8b',
     label: 'Llama 3 8B (~temp)',
@@ -329,7 +274,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     tokenizerSpec: {
       type: 'hf-tokenizers',
       tokenizerPath: '/tokenizers/qwen.json'
-    }
+  }
   },
   'claude-3-haiku': {
     key: 'claude-3-haiku',
@@ -342,7 +287,8 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     pricing: {
       inputPer1K: 0.25,
       outputPer1K: 1.25
-    }
+  },
+  disabled: true
   }
 }
 
@@ -360,10 +306,5 @@ export function getModelsByFamily(family: string): ModelInfo[] {
   )
 }
 
-export function getExampleModels(): ModelInfo[] {
-  return getModelsByFamily('example')
-}
-
-export function getDefaultExampleModel(): ModelInfo {
-  return MODEL_REGISTRY['example-basic']
-}
+export function getExampleModels(): ModelInfo[] { return [] }
+export function getDefaultExampleModel(): ModelInfo { throw new Error('No example model defined') }
