@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+/* Custom design tokens for premium typography & colors */
+:root {
+  --tc-bg: #fafafa;
+  --tc-border: #e4e4e7;
+  --tc-panel: #ffffff;
+  --tc-accent: #059669;
+  --tc-accent-hover: #047857;
+  --tc-danger: #dc2626;
+  --tc-text: #09090b;
+  --tc-muted: #71717a;
+  --tc-radius: 12px;
+  
+  /* Token colors - sophisticated palette */
+  --token-word: #1e40af;
+  --token-space: #6b7280;
+  --token-punct: #7c3aed;
+  --token-number: #dc2626;
+  
+  color-scheme: light;
+}
+
+html, body, #root { height: 100%; }
+body { 
+  @apply bg-[var(--tc-bg)] text-[var(--tc-text)] antialiased leading-relaxed; 
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}/* Layout */
+.app-shell { @apply max-w-5xl mx-auto p-6 md:p-10; }
+.panel { @apply bg-[var(--tc-panel)] border border-[var(--tc-border)] rounded-xl shadow-sm; }
+
+/* Button */
+.btn { @apply inline-flex items-center gap-2 font-medium px-4 py-2 rounded-md border text-sm transition-colors select-none; }
+.btn-primary { @apply bg-[var(--tc-accent)] border-[var(--tc-accent)] text-white; }
+.btn-primary:hover { background: var(--tc-accent-hover); }
+.btn-secondary { @apply bg-white border-[var(--tc-border)] text-[var(--tc-text)] hover:bg-gray-50; }
+
+/* Text areas */
+.input-area { @apply w-full h-48 resize-none outline-none p-4 text-sm leading-relaxed bg-transparent; }
+.input-wrapper { @apply bg-[var(--tc-panel)] border border-[var(--tc-border)] rounded-xl shadow-sm relative overflow-hidden flex flex-col; }
+.input-wrapper label { @apply absolute left-4 top-2 text-xs uppercase tracking-wide text-[var(--tc-muted)]; }
+
+/* Stats */
+.stats-grid { @apply grid gap-4 text-sm; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); }
+.stat-box { @apply bg-[var(--tc-panel)] border border-[var(--tc-border)] rounded-xl shadow-sm p-3 flex flex-col gap-1; }
+.stat-label { @apply text-[var(--tc-muted)] text-xs font-medium; }
+.stat-value { @apply text-base font-semibold tabular-nums; }
+
+/* Model select */
+.select { @apply border border-[var(--tc-border)] rounded-md bg-white px-2 py-1 text-sm; }
+
+/* Context badge */
+.context-badge { @apply text-xs font-medium px-2 py-1 rounded-full border bg-white inline-flex items-center gap-1; }
+.context-over { @apply border-[var(--tc-danger)] text-[var(--tc-danger)] bg-red-50; }
+
+/* Token preview with sophisticated styling */
+.token-preview { 
+  @apply bg-[var(--tc-panel)] border border-[var(--tc-border)] rounded-xl shadow-sm p-4 min-h-32 flex flex-wrap overflow-y-auto; 
+  font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 0;
+  gap: 0;
+  align-items: flex-start;
+}
+
+.token-chip { 
+  display: inline-flex;
+  padding: 2px 4px;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  transition: all 0.15s ease;
+  position: relative;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  line-height: 1.2;
+  color: white;
+  font-size: 12px;
+  align-items: center;
+  min-height: 20px;
+}
+
+.token-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 1;
+}
+
+.token-space {
+  padding: 2px 3px;
+  min-width: 8px;
+  opacity: 0.6;
+  font-size: 10px;
+}
+
+/* File input hidden */
+input[type=file].hidden-input { @apply hidden; }
+
+/* Utility */
+.sr-only { @apply absolute w-px h-px p-0 m-0 overflow-hidden whitespace-nowrap border-0; clip: rect(0 0 0 0); }
+
+/* Scrollbars (subtle) */
+.token-preview::-webkit-scrollbar { width: 8px; }
+.token-preview::-webkit-scrollbar-thumb { background: #d0d0ce; border-radius: 4px; }
+
+/* Remove old center alignment from starter */
+#root { text-align: left; }
+
+/* Cost Calculator Styles */
+.cost-calculator {
+  background: white;
+  border: 1px solid var(--tc-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.cost-header {
+  padding: 12px 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--tw-gradient-stops));
+}
+
+.cost-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.cost-provider {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+  position: relative;
+  z-index: 10;
+}
+
+.cost-model {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.25;
+  position: relative;
+  z-index: 10;
+  margin-top: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.cost-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cost-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cost-section.cost-cached {
+  opacity: 0.75;
+}
+
+.cost-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cost-type {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--tc-text);
+}
+
+.cost-rate {
+  font-size: 11px;
+  color: var(--tc-muted);
+  font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+}
+
+.cost-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tc-accent);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgba(5, 150, 105, 0.1);
+}
+
+.cost-value-cached {
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+.cost-tokens {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--tc-border);
+  margin-top: 12px;
+}
+
+.cost-tokens-count {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--tc-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.cost-tokens-label {
+  font-size: 14px;
+  color: var(--tc-muted);
+  font-weight: 500;
+}
+
+/* Enhanced responsive design for cost calculator */
+@media (max-width: 640px) {
+  .cost-calculator {
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+  
+  .cost-value {
+    font-size: 16px;
+  }
+  
+  .cost-tokens-count {
+    font-size: 18px;
+  }
+}

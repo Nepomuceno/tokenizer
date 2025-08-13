@@ -1,0 +1,22 @@
+provider,model,tokenizer/library,input_price_per_1M_usd,input_cached_price_per_1M_usd,price_source
+OpenAI,gpt-4o,tiktoken (o200k_base),2.5,1.25,OpenAI pricing + prompt caching
+OpenAI,gpt-4o-mini,tiktoken (o200k_base),0.15,0.075,OpenAI pricing + prompt caching
+Anthropic,Claude Sonnet 4,Anthropic SDK (count_tokens),3.0,0.3,Anthropic pricing (prompt caching multipliers)
+Anthropic,Claude Sonnet 3.7,Anthropic SDK (count_tokens),3.0,0.3,Anthropic pricing (prompt caching multipliers)
+Anthropic,Claude Haiku 3.5,Anthropic SDK (count_tokens),0.8,0.08,Anthropic pricing (prompt caching multipliers)
+Anthropic,Claude Opus 4.1,Anthropic SDK (count_tokens),15.0,1.5,Anthropic pricing (prompt caching multipliers)
+Google,Gemini 2.5 Flash,google-generativeai SDK (count_tokens),0.3,0.3125,OpenRouter model page + Gemini pricing
+xAI,Grok 4,API usage (no public tokenizer),3.0,0.75,OpenRouter model page + OR caching doc
+Perplexity,Sonar Pro,API usage (varies by underlying model),3.0,,Perplexity pricing page
+Perplexity,Sonar Reasoning Pro,API usage (DeepSeek-based),2.0,,Perplexity pricing page
+Perplexity,Sonar,API usage,1.0,,Perplexity pricing page
+Cohere,Command R+,cohere SDK (token counting in API),3.0,,OpenRouter model page
+Mistral,Mistral Large (latest),mistral-common (SentencePiece),,,—
+Mistral,Mistral Small (latest),mistral-common (SentencePiece),,,—
+Meta,Llama 3.1 405B Instruct,TikTokenizer / tiktoken-based (Llama3),,,—
+Meta,Llama 3.1 70B Instruct,TikTokenizer / tiktoken-based (Llama3),,,—
+Meta,Llama 3.1 8B Instruct,TikTokenizer / tiktoken-based (Llama3),,,—
+Alibaba,Qwen 2.5 72B Instruct,SentencePiece (HF AutoTokenizer),,,—
+Microsoft,Phi-3.5-mini-instruct,SentencePiece (HF AutoTokenizer),,,—
+DeepSeek,DeepSeek V3 (Chat),HF Tokenizers / deepseek_tokenizer,,0.07,DeepSeek docs (cache reads)
+DeepSeek,DeepSeek R1 (Reasoner),HF Tokenizers / deepseek_tokenizer,,0.14,DeepSeek docs (cache reads)
