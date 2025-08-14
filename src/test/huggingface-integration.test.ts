@@ -28,7 +28,7 @@ describe('HuggingFace Integration', () => {
     } as Response)
   })
 
-  it('should work with the Mistral model from registry', async () => {
+  it('should provide adapter for Mistral model but encode/count unsupported', async () => {
     const modelInfo = getModelInfo('mistral-7b')
     expect(modelInfo).toBeDefined()
     expect(modelInfo?.tokenizerSpec.type).toBe('hf-tokenizers')
@@ -36,14 +36,8 @@ describe('HuggingFace Integration', () => {
     if (modelInfo) {
       const adapter = await tokenizerFactory.getAdapter(modelInfo.tokenizerSpec)
       expect(adapter).toBeDefined()
-
-      const text = 'Hello world!'
-      const tokenIds = await adapter.encode(text)
-      const count = await adapter.count(text)
-
-      expect(tokenIds).toBeInstanceOf(Array)
-      expect(tokenIds.length).toBeGreaterThan(0)
-      expect(count).toBe(tokenIds.length)
+      await expect(adapter.encode('Hello world!')).rejects.toThrow('not supported')
+      await expect(adapter.count('Hello world!')).rejects.toThrow('not supported')
     }
   })
 

@@ -182,39 +182,11 @@ describe('HuggingFaceAdapter', () => {
     expect(adapter).toBeDefined()
   })
 
-  it('should encode text and return token IDs', async () => {
-    const text = 'Hello world'
-    const tokenIds = await adapter.encode(text)
-    
-    expect(tokenIds).toBeInstanceOf(Array)
-    expect(tokenIds.length).toBeGreaterThan(0)
-    expect(tokenIds.every(id => typeof id === 'number')).toBe(true)
-  })
-
-  it('should count tokens correctly', async () => {
-    const text = 'Hello world'
-    const count = await adapter.count(text)
-    const tokenIds = await adapter.encode(text)
-    
-    expect(count).toBe(tokenIds.length)
-    expect(count).toBeGreaterThan(0)
-  })
-
-  it('should handle empty text', async () => {
-    const tokenIds = await adapter.encode('')
-    const count = await adapter.count('')
-    
-    expect(tokenIds).toEqual([])
-    expect(count).toBe(0)
-  })
-
-  it('should handle longer text', async () => {
-    const text = 'This is a longer piece of text that should be tokenized properly.'
-    const tokenIds = await adapter.encode(text)
-    const count = await adapter.count(text)
-    
-    expect(tokenIds.length).toBeGreaterThan(5)
-    expect(count).toBe(tokenIds.length)
+  it('should throw unsupported errors for encode/count', async () => {
+    await expect(adapter.encode('Hello world')).rejects.toThrow('not supported')
+    await expect(adapter.count('Hello world')).rejects.toThrow('not supported')
+    await expect(adapter.encode('')).rejects.toThrow('not supported')
+    await expect(adapter.count('')).rejects.toThrow('not supported')
   })
 
   it('should throw error if not initialized', async () => {

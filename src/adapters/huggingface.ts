@@ -23,7 +23,9 @@ export class HuggingFaceAdapter implements TokenizerAdapter {
   private initialized = false
 
   constructor(tokenizerPath: string) {
-    this.tokenizerPath = tokenizerPath
+  // Defer resolution; we'll normalize in init so that Vite's import.meta.env.BASE_URL
+  // is available (some tools may construct before environment is injected).
+  this.tokenizerPath = tokenizerPath
   }
 
   async init(): Promise<void> {
@@ -37,18 +39,29 @@ export class HuggingFaceAdapter implements TokenizerAdapter {
       }
       let tokenizerData: TokenizerJSON
       
-      if (this.tokenizerPath.startsWith('http')) {
+      // Resolve local vs remote path. For local relative/absolute-looking paths we
+      // prefix with import.meta.env.BASE_URL (which already contains trailing '/').
+      const rawPath = this.tokenizerPath
+      const baseUrl = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL || '/'
+      const isRemote = /^https?:\/\//i.test(rawPath)
+      // Treat paths starting with '/' or without protocol as local assets within public/.
+      // Remove any leading '/' so concatenation with BASE_URL (which may itself be './' or '/sub/') works.
+      const resolvedPath = isRemote
+        ? rawPath
+        : `${baseUrl.replace(/\/$/, '')}/${rawPath.replace(/^\//, '')}`
+
+      if (isRemote) {
         // For remote tokenizer.json files
-        const response = await fetch(this.tokenizerPath)
+        const response = await fetch(resolvedPath)
         if (!response.ok) {
-          throw new Error(`Failed to fetch tokenizer from ${this.tokenizerPath}: ${response.statusText}`)
+          throw new Error(`Failed to fetch tokenizer from ${resolvedPath}: ${response.statusText}`)
         }
         tokenizerData = await response.json()
       } else {
         // For local tokenizer.json files (in public directory)
-        const response = await fetch(this.tokenizerPath)
+        const response = await fetch(resolvedPath)
         if (!response.ok) {
-          throw new Error(`Failed to fetch tokenizer from ${this.tokenizerPath}: ${response.statusText}`)
+          throw new Error(`Failed to fetch tokenizer from ${resolvedPath}: ${response.statusText}`)
         }
         tokenizerData = await response.json()
       }
@@ -69,7 +82,7 @@ export class HuggingFaceAdapter implements TokenizerAdapter {
 
       this.initialized = true
     } catch (error) {
-      throw new Error(`Failed to initialize HuggingFace tokenizer from ${this.tokenizerPath}: ${error instanceof Error ? error.message : String(error)}`)
+  throw new Error(`Failed to initialize HuggingFace tokenizer from ${this.tokenizerPath}: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -78,71 +91,19 @@ export class HuggingFaceAdapter implements TokenizerAdapter {
       throw new Error('HuggingFace tokenizer not initialized. Call init() first.')
     }
 
-    try {
-      return this.simpleEncode(text)
-    } catch (error) {
-      throw new Error(`Failed to encode text with HuggingFace tokenizer: ${error instanceof Error ? error.message : String(error)}`)
-    }
+    // The lightweight adapter currently only loads vocab metadata but does not
+    // perform true BPE/SentencePiece operations. Rather than returning an
+    // inaccurate approximation, we report unsupported so the UI can disable
+    // selection or inform the user.
+    throw new Error('HuggingFace tokenizer encode not supported in lite mode')
   }
 
   async count(text: string): Promise<number> {
     if (!this.initialized) {
       throw new Error('HuggingFace tokenizer not initialized. Call init() first.')
     }
-
-    try {
-      const tokens = this.simpleEncode(text)
-      return tokens.length
-    } catch (error) {
-      throw new Error(`Failed to count tokens with HuggingFace tokenizer: ${error instanceof Error ? error.message : String(error)}`)
-    }
+    throw new Error('HuggingFace tokenizer count not supported in lite mode')
   }
 
-  private simpleEncode(text: string): number[] {
-    if (!text) return []
-
-    // Simple tokenization approach:
-    // 1. Split into words and handle subwords
-    // 2. Look up tokens in vocabulary
-    // 3. Fall back to character-level tokenization for unknown tokens
-
-    const tokens: number[] = []
-    const words = text.split(/(\s+)/)
-
-    for (const word of words) {
-      if (word.trim() === '') {
-        // Handle whitespace
-        const spaceToken = this.vocab['▁'] || this.vocab[' ']
-        if (spaceToken !== undefined) {
-          tokens.push(spaceToken)
-        }
-        continue
-      }
-
-      // Try to find the word in vocabulary (with and without space prefix)
-      const wordWithSpace = '▁' + word
-      if (this.vocab[wordWithSpace] !== undefined) {
-        tokens.push(this.vocab[wordWithSpace])
-        continue
-      }
-
-      if (this.vocab[word] !== undefined) {
-        tokens.push(this.vocab[word])
-        continue
-      }
-
-      // Fall back to character-level tokenization
-      for (const char of word) {
-        if (this.vocab[char] !== undefined) {
-          tokens.push(this.vocab[char])
-        } else {
-          // Use a default unknown token ID or the first token
-          const unknownTokenId = this.vocab['<unk>'] || this.vocab['[UNK]'] || 0
-          tokens.push(unknownTokenId)
-        }
-      }
-    }
-
-    return tokens
-  }
+  // Intentionally no fallback simpleEncode implementation to avoid misleading counts
 }
