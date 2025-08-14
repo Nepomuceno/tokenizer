@@ -160,7 +160,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 128000,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/mistral.json'
+      tokenizerPath: 'tokenizers/mistral.json'
     },
     pricing: {
       inputPer1K: 2.0,
@@ -173,7 +173,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 128000,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/mistral.json'
+      tokenizerPath: 'tokenizers/mistral.json'
     },
     pricing: {
       inputPer1K: 1.0,
@@ -186,7 +186,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 32768,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/mistral.json'
+      tokenizerPath: 'tokenizers/mistral.json'
     },
     pricing: {
       inputPer1K: 0.25,
@@ -202,7 +202,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 128000,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/qwen.json'
+      tokenizerPath: 'tokenizers/qwen.json'
   }
   },
   'llama-3.1-70b': {
@@ -211,7 +211,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 128000,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/qwen.json'
+      tokenizerPath: 'tokenizers/qwen.json'
   }
   },
   'llama-3.1-8b': {
@@ -220,7 +220,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 128000,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/qwen.json'
+      tokenizerPath: 'tokenizers/qwen.json'
   }
   },
 
@@ -231,7 +231,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 131072,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/qwen.json'
+      tokenizerPath: 'tokenizers/qwen.json'
     }
   },
 
@@ -242,7 +242,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 128000,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/phi-3.5.json'
+      tokenizerPath: 'tokenizers/phi-3.5.json'
     }
   },
 
@@ -253,7 +253,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 64000,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/deepseek-v3.json'
+      tokenizerPath: 'tokenizers/deepseek-v3.json'
     }
   },
   'deepseek-r1': {
@@ -262,7 +262,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 64000,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/deepseek-r1.json'
+      tokenizerPath: 'tokenizers/deepseek-r1.json'
     }
   },
 
@@ -273,7 +273,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 8192,
     tokenizerSpec: {
       type: 'hf-tokenizers',
-      tokenizerPath: '/tokenizers/qwen.json'
+      tokenizerPath: 'tokenizers/qwen.json'
   }
   },
   'claude-3-haiku': {
